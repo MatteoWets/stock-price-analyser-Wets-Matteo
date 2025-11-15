@@ -76,7 +76,7 @@ testdata = yf.download(
 trainingflat = trainingdata.stack(level=0).rename_axis(('Date', 'Ticker')).reset_index()
 
 # Save to CSV
-trainingflat.to_csv("Data/trainingdata.csv", index=False)
+trainingflat.to_csv("data/training.csv", index=False)
 
 
 # Or flatten the structure:
@@ -84,5 +84,5 @@ trainingflat.to_csv("Data/trainingdata.csv", index=False)
 testflat = testdata.stack(level=0).rename_axis(('Date', 'Ticker')).reset_index()
 
 # Save to CSV
-testflat.to_csv("Data/testdata.csv", index=False)
+testflat.to_csv("data/testing.csv", index=False)
 
