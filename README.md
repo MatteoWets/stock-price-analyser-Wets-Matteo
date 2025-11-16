@@ -7,3 +7,7 @@ que calcule mon add feature ?
 dmd a chat de créer un set par feature pr voir si c pertinent à garder
 
 Modifier proposal
+
+Forcast price based on moving avg of SPY
+
+créer des features, garder les plus pertinentes et intégrer au modèle 
