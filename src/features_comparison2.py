@@ -1,3 +1,5 @@
+# This script creates visualizations to compare and analyze the top 50 engineered features
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

@@ -92,6 +92,55 @@ def calculate_base_features(df):
     
     return df
 
+# Nasdaq, S&P500 (ETF) and Volatility index features:
+def add_market_features(stock_df, market_data):
+    """
+    Add market context features (Relative Strength, Beta, VIX)
+    NOTE: Uses 'Close' for all calculations, as 'Adj Close' is not guaranteed 
+    in all datasets/download methods.
+    """
+    # NASDAQ
+    nasdaq = market_data[market_data['Ticker'] == '^IXIC'][['Date', 'Close']].copy()
+    nasdaq.columns = ['Date', 'nasdaq_close']
+    nasdaq['nasdaq_return_1m'] = nasdaq['nasdaq_close'].pct_change(21)
+    
+    # SPY (S&P 500 ETF)
+    spy = market_data[market_data['Ticker'] == 'SPY'][['Date', 'Close']].copy()
+    spy.columns = ['Date', 'spy_close']
+    spy['spy_return_1m'] = spy['spy_close'].pct_change(21)
+    
+    # Calculate SPY-200 day SMA ratio (market regime indicator)
+    spy_sma_raw = spy['spy_close'].rolling(200).mean()
+    spy['spy_sma200_ratio'] = (spy['spy_close'] / spy_sma_raw) - 1
+    
+    # VIX (Volatility index)
+    vix = market_data[market_data['Ticker'] == '^VIX'][['Date', 'Close']].copy()
+    vix.columns = ['Date', 'vix_level']
+    vix['vix_change_1m'] = vix['vix_level'].pct_change(21)
+    
+    # Merge data
+    stock_df = stock_df.merge(nasdaq[['Date', 'nasdaq_return_1m', 'nasdaq_close']], on='Date', how='left')
+    stock_df = stock_df.merge(spy[['Date', 'spy_return_1m', 'spy_sma200_ratio']], on='Date', how='left')
+    stock_df = stock_df.merge(vix[['Date', 'vix_level', 'vix_change_1m']], on='Date', how='left')
+    
+    # Fill NaNs (Market data might have different holidays/trading days)
+    for col in ['nasdaq_return_1m', 'spy_return_1m', 'vix_level', 'vix_change_1m', 'spy_sma200_ratio']:
+        stock_df[col] = stock_df[col].fillna(method='ffill')
+    
+    # Relative strength (Stock return minus Market return)
+    stock_df['relative_strength_nasdaq'] = stock_df['return_1m'] - stock_df['nasdaq_return_1m']
+    stock_df['relative_strength_spy'] = stock_df['return_1m'] - stock_df['spy_return_1m']
+    
+    # Beta calculation (Rolling 63-day Beta vs Nasdaq)
+    stock_returns = stock_df['Close'].pct_change()
+    nasdaq_returns = stock_df['nasdaq_close'].pct_change()
+    stock_df['beta_nasdaq'] = stock_returns.rolling(63).cov(nasdaq_returns) / nasdaq_returns.rolling(63).var()
+    
+    # Drop raw price columns (cleanup)
+    stock_df = stock_df.drop(['nasdaq_close'], axis=1)
+    
+    return stock_df
+
 def add_market_regime_features(df):
     """Add market-wide features"""
     print("  Adding market regime features...")
@@ -233,5 +282,4 @@ def get_scalable_features():
         'market_volatility', 'beta', 'correlation_market',
         'return_1d', 'return_5d', 'return_21d', 'return_63d',
         'rsi_14', 'bb_position', 'macd_hist', 'dist_from_52w_high'
-        # ... and many more ratios/indicators
     ]

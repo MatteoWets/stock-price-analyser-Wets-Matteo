@@ -229,7 +229,7 @@ def test_all_models(csv_path=None, use_saved=True):
     else:
         print("Processing test data from scratch...")
         from feature_engineering import engineer_features
-        from normalize_data import load_scalers, apply_scalers, get_scalable_features
+        from feature_normalized import load_scalers, apply_scalers, get_scalable_features
         
         df = pd.read_csv(csv_path)
         df['Date'] = pd.to_datetime(df['Date'])

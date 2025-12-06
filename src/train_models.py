@@ -141,7 +141,7 @@ class BinaryClassificationTrainer:
     
     def train_all_targets(self, df, feature_cols, train_end_date='2022-01-01', fast_mode=False):
         """Train binary classification models for all direction targets"""
-        from feature_selection import FeatureSelector
+        from features_selection import FeatureSelector
         
         train_df = df[df['Date'] < train_end_date].copy()
         
@@ -226,7 +226,7 @@ class BinaryClassificationTrainer:
 def train_all_models(csv_path, train_end_date='2022-01-01', fast_mode=False):
     """Main training pipeline"""
     from feature_engineering import engineer_features, get_feature_columns, get_scalable_features
-    from normalize_data import normalize_features, save_scalers
+    from feature_normalized import normalize_features, save_scalers
     
     # Load data
     print("Loading data...")
