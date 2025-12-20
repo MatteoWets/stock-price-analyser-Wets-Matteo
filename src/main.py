@@ -14,7 +14,8 @@ EXCLUDE = {
     "train_models.py",
     "test_models.py",
     "feature_engineeringV1.py",
-    "features_comparison.py"
+    "features_comparison.py",
+    "final_visualitzation.py"
 }
 
 def run_all_scripts(dry_run=False):

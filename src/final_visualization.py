@@ -1,3 +1,6 @@
+# This script creates the final visualizations with all the results
+
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
