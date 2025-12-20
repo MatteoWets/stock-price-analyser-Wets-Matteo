@@ -1,3 +1,5 @@
+# This script creates the final visualization for the results
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -81,8 +83,8 @@ for idx, (metric, title) in enumerate(zip(metrics, titles)):
 plt.tight_layout()
 
 # Save the figure
-plt.savefig('model_performance_comparison.png', dpi=300, bbox_inches='tight')
-print("Visualization saved as 'model_performance_comparison.png'")
+plt.savefig('test_results_visualization.png', dpi=300, bbox_inches='tight')
+print("Visualization saved as 'test_results_visualization.png'")
 
 # Show the plot
 plt.show()
