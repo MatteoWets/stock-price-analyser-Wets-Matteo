@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 # This script creates the final visualization for the results
+=======
+# This script creates the final visualizations with all the results
+
+>>>>>>> 8197f3c8b1bc4b6c148354d233c9296efa9890e9
 
 import pandas as pd
 import matplotlib.pyplot as plt
