@@ -50,7 +50,12 @@ EXCLUDE = {
     "main.py",  # avoid re-running this launcher
     "feature_engineeringV1.py",
     "features_comparison.py",
+<<<<<<< HEAD
     "final_visualizations.py"
+
+=======
+    "final_visualitzation.py"
+>>>>>>> 8197f3c8b1bc4b6c148354d233c9296efa9890e9
 }
 
 def run_all_scripts(dry_run=False):
