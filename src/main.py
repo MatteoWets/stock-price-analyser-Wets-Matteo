@@ -1,64 +1,96 @@
 #!/usr/bin/env python3
-"""Main pipeline to run everything"""
+"""Main pipeline to run everything with full reproducibility"""
 import sys
-import os
 import os
 import runpy
 import argparse
 import traceback
 
-SRC_DIR = os.path.dirname(__file__)
+def set_all_seeds(seed=42):
+    """Set all random seeds for complete reproducibility"""
+    import random
+    import numpy as np
+    
+    # Set all seeds
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    
+    # Scikit-learn
+    try:
+        import sklearn
+        sklearn.set_config(random_state=seed)
+    except:
+        pass
+    
+    # TensorFlow
+    try:
+        import tensorflow as tf
+        tf.random.set_seed(seed)
+        os.environ['TF_DETERMINISTIC_OPS'] = '1'
+    except:
+        pass
+    
+    # PyTorch
+    try:
+        import torch
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    except:
+        pass
 
+# Set seeds at module level (before any imports)
+set_all_seeds(42)
+
+SRC_DIR = os.path.dirname(__file__)
 EXCLUDE = {
-    "main.py",           # avoid re-running this launcher
-    "train_models.py",
-    "test_models.py",
+    "main.py",  # avoid re-running this launcher
     "feature_engineeringV1.py",
     "features_comparison.py",
-<<<<<<< HEAD
     "final_visualizations.py"
-
-=======
-    "final_visualitzation.py"
->>>>>>> 8197f3c8b1bc4b6c148354d233c9296efa9890e9
 }
 
 def run_all_scripts(dry_run=False):
+    """Run all scripts in alphabetical order with seed reset before each"""
     files = sorted(f for f in os.listdir(SRC_DIR) if f.endswith(".py") and f not in EXCLUDE)
+    
     print(f"Found {len(files)} scripts to run:")
     for f in files:
-        path = os.path.join(SRC_DIR, f)
         print(f" -> {f}")
+    
     if dry_run:
         return
-
+    
     for f in files:
         path = os.path.join(SRC_DIR, f)
         print("\n" + "=" * 60)
         print(f"Running: {f}")
         print("=" * 60)
+        
+        # CRITICAL: Reset seeds before EACH script
+        set_all_seeds(42)
+        
         try:
-            # execute the script as __main__ so any guarded main() will run
+            # Execute the script as __main__ so any guarded main() will run
             runpy.run_path(path, run_name="__main__")
+            print(f"✓ {f} completed successfully")
         except Exception as e:
             print(f"Error running {f}: {e}")
             traceback.print_exc()
-            # continue to next script (don't stop the whole process)
+            # Continue to next script (don't stop the whole process)
             continue
-
-if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Run all src/*.py (except excluded)")
-    ap.add_argument("--dry-run", action="store_true", help="List scripts without running")
-    args = ap.parse_args()
-    run_all_scripts(dry_run=args.dry_run)
 
 # Add src directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from train_models import train_all_models
-from test_models import test_all_models
-
 def main():
+    """Main pipeline execution"""
+    # Reset seeds at the start
+    set_all_seeds(42)
+    
     # Get project root directory (parent of src/)
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
@@ -78,10 +110,18 @@ def main():
     os.makedirs('data', exist_ok=True)
     
     try:
+        # Import after setting seeds
+        from train_models import train_all_models
+        from test_models import test_all_models
+        
         # TRAINING PHASE
         print("="*60)
         print("TRAINING PHASE")
         print("="*60)
+        
+        # Reset seeds before training
+        set_all_seeds(42)
+        
         trainer = train_all_models(
             data_path,
         )
@@ -90,6 +130,10 @@ def main():
         print("\n" + "="*60)
         print("TESTING PHASE")
         print("="*60)
+        
+        # Reset seeds before testing
+        set_all_seeds(42)
+        
         tester = test_all_models(
             csv_path=data_path,
             use_saved=True  # Use the normalized data from training
@@ -115,4 +159,16 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    # Parse arguments
+    ap = argparse.ArgumentParser(description="Run all src/*.py (except excluded)")
+    ap.add_argument("--dry-run", action="store_true", help="List scripts without running")
+    ap.add_argument("--run-all", action="store_true", help="Run all scripts in order first")
+    args = ap.parse_args()
+    
+    # Set seeds before anything else
+    set_all_seeds(42)
+    
+    if args.run_all:
+        run_all_scripts(dry_run=args.dry_run)
+    else:
+        main()

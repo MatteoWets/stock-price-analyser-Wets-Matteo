@@ -9,6 +9,13 @@ from sklearn.utils.class_weight import compute_class_weight
 import pickle
 import os
 import sys
+import random
+
+random.seed(42)
+np.random.seed(42)
+
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 
 import warnings
 warnings.filterwarnings('ignore')

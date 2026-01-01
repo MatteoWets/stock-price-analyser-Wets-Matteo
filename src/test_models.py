@@ -8,6 +8,10 @@ import pickle
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import random
+
+random.seed(42)
+np.random.seed(42)
 
 class BinaryClassificationTester:
     def __init__(self, models_dir='models'):
